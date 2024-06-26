@@ -1,12 +1,14 @@
 # LegacyDynEnv
-glibc 2.23버전을 샤용하는 바이너리를 기존에 사용하던 분석환경에서 동적 분석을 하기 위한 컨테이너 시스템
+
+glibc 2.23버전을 샤용하는 바이너리를 기존에 사용하던 분석환경에서 동적 분석을 하기 위한 컨테이너 시스템   
+
+<br>
 
 ## 🖥️ 프로그램 소개
-해당 시스템은 glibc 2.23버전으로 동작하는 바이너리를 이용하기를 원하는 분들에게 
-편하게 기존에서 이용하시던 환경에서 사용할 수 있도록 세팅 파일들을 제공해주는 시스템이다.
+해당 시스템은 glibc 2.23버전으로 동작하는 바이너리를 이용하기를 원하는 분들에게 편하게 기존에서 이용하시던 환경에서 사용할 수 있도록 세팅 파일들을 제공해주는 시스템이다.
 
 - 시스템 구성도
-<center><img width="450" alt="github_LegacyDynEnv_figure1" src="https://github.com/Greedun/LegacyDynEnv/assets/78598657/b467db75-f494-4f9b-ac74-0ef2671f9709"></center>
+<center><img width="750" alt="github_LegacyDynEnv_figure1" src="https://github.com/Greedun/LegacyDynEnv/assets/78598657/b467db75-f494-4f9b-ac74-0ef2671f9709"></center>
 
 - 개발의도
   - glibc 2.23버전을 쓰기 위해선 ubuntu 16.04가 필요
@@ -21,8 +23,10 @@ glibc 2.23버전을 샤용하는 바이너리를 기존에 사용하던 분석�
 - 반자동화를 선택한 이유
   => 사용자마다 기존에 사용한 분석환경이 다르기 때문에 시스템이 생성한 파일을 이동하도록 설계
 
+<br>
+
 ## ⚙️ 개발 환경 및 파일 역할
-low_compile.sh
+- low_compile.sh
   - 핵심파일
   - 해당 쉘스크립트를 실행시 분석환경에 옮길 파일들이 export폴더에 생성
 - target.c
@@ -33,13 +37,18 @@ low_compile.sh
 	- 바이너리를 사용할 환경에서 실행
 	- 바이너리가 이용하는 libc, ld.so파일을 변경하는 작업을 수행
 
+<br>
+
 ## 환경 구축 결과
 최신 ubuntu버전에서 이 시스템에서 생성한 파일 (컴파일된 바이너리, ld.so, libc.so.6)을 동적 디버깅 시도
 
-<center><img width="400" alt="github_LegacyDynEnv_figure2" src="https://github.com/Greedun/LegacyDynEnv/assets/78598657/99582c41-ab77-48b8-9403-1c57579368f6"></center>
+<center><img width="500" alt="github_LegacyDynEnv_figure2" src="https://github.com/Greedun/LegacyDynEnv/assets/78598657/99582c41-ab77-48b8-9403-1c57579368f6"></center>
 
 최신 glibc에서는 tcache가 우선적으로 쓰인다.
+
 해당 시스템에서 생성한 파일을 동적 디버깅한 결과 tcache가 아닌 unsorted bin에 들어간 것으로 glibc 2.23라이브러리가 실행된 것을 확인할 수 있다.
+
+<br>
 
 ## 📌 사용방법
 ```text
@@ -63,6 +72,7 @@ low_compile.sh
 5. "gdb target"을 통해 동적 디버깅 수행
 ```
 
+<br>
 
 > (1) 동적 디버깅 해야 할 코드 준비
 ex) target.c
@@ -119,6 +129,8 @@ int main() {
 ```
 => chathpt를 이용해 생성한 malloc, free함수를 이용하는 코드
 
+<br>
+
 > (2) docker(ubuntu16)을 이용해서 코드 컴파일한 후 내부에서 libc.so.6, ld.so파일을 확보
    low_compile.sh파일 실행 (target, libc.so.6, ld.so 파일 확보)
 
@@ -161,12 +173,16 @@ echo "[*] result export file"
 ls ./export
 ```
 
+<br>
+
 > (3) 분석 환경에 필요한 파일들을 직접 옮김
 
 <img width="400" alt="github_LegacyDynEnv_figure3" src="https://github.com/Greedun/LegacyDynEnv/assets/78598657/bf2ddf52-8fbf-4bc9-aa40-4bbee0de0246">
 
 시스템을 가동시키면 export폴더에 이후 분석환경에서 필요한 파일들이 생성된다.
 export폴더에 있는 파일들을 원하는 분석 환경에 옮겨둔다.
+
+<br>
 
 > (4) patchelf.sh를 실행시켜 바이너리 패치 진행
 
@@ -190,10 +206,16 @@ strings target | grep GLIBC
 ```
 => 바이너리의 종속되어 있는 ld.so와 libc.so.6를 patchelf도구를 이용하여 변경해준다.
 
+<br>
 
 <img width="838" alt="github_LegacyDynEnv_figure4" src="https://github.com/Greedun/LegacyDynEnv/assets/78598657/598bc565-35d8-4c42-b395-a4904da26306">
 <img width="655" alt="github_LegacyDynEnv_table1" src="https://github.com/Greedun/LegacyDynEnv/assets/78598657/0790e4d9-7f1b-4fcf-b499-b8dab2c96ff9">
+
+<br>
+
 => 바이너리를 ldd, strings명령어를 통해 확인하면 위 표와 같은 차이점이 존재한다.
+
+<br>
 
 > (5) "gdb target"을 통해 동적 디버깅 수행
 
